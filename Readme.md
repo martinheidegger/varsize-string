@@ -1,6 +1,7 @@
 [![ISC License](https://img.shields.io/badge/license-ISC-blue.svg?style=flat)](LICENSE.md)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
 [![npm version](https://badge.fury.io/js/varsize-string.svg)](https://badge.fury.io/js/varsize-string)
+[![Build Status](https://travis-ci.org/martinheidegger/varsize-string.svg?branch=master)](https://travis-ci.org/martinheidegger/varsize-string)
 
 # varsize-string
 Varsize-string is a JavaScript CommonJS (node.js) package for working
@@ -27,8 +28,8 @@ var str2 = VarSizeString('abcDEF', charWidth) // You don't need to use `new`
 
 ## Application
 The most important application of `varsize-string` is in combination with 
-[`wcsize`]() that identifies the size of strings rendered in a common terminal,
-see [`wcstring`]() for a shorthand combination of both.
+[`wcsize`](https://github.com/martinheidegger/wcsize) that identifies the size of strings rendered in a common terminal,
+see [`wcstring`](https://github.com/martinheidegger/wcstring) for a shorthand combination of both.
 
 It can also be used in a (visual) web context to correctly `wrap` or `truncate` strings.
 
