@@ -12,7 +12,7 @@ VarSizeString.prototype.init = function () {
     if (this.string.length > 0) {
       var string = this.string
       const lookup = this.characterLookup
-      const sizes = new Int8Array(string.length)
+      const sizes = new Float32Array(string.length)
       var size = 0
       var formerChar = null
       for (var i = 0; i < string.length; i++) {
@@ -92,9 +92,15 @@ VarSizeString.prototype.substring = function (start, end) {
     to -= 1
   }
 
+  var endSize
+  if (to === this.string.length) {
+    endSize = this._size
+  } else {
+    endSize = sizes[to]
+  }
   return {
     string: this.string.substring(from, to),
-    size: sizes[to] - sizes[from]
+    size: endSize - sizes[from]
   }
 }
 VarSizeString.prototype.width = function () {

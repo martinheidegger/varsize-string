@@ -34,9 +34,14 @@ function substring (string, from, to) {
   return str(string, vars).substring(from, to).string
 }
 
-function substr (string, from, to) {
-  return str(string, vars).substr(from, to).string
+function _substr (string, from, to) {
+  return str(string, vars).substr(from, to)
 }
+
+function substr (string, from, to) {
+  return _substr(string, from, to).string
+}
+
 function width (string) {
   return str(string, vars).width()
 }
@@ -175,5 +180,25 @@ test('truncate', function (t) {
   t.equals(truncate('あいうえお', 6, '...'), 'あ...', 'Too short with double width 3')
   t.equals(truncate('あいうえお', 5, '…'), 'あ…', 'Double width suffix on double width characters')
   t.equals(truncate('あいうえお', 5, str('…', vars)), 'あ…', 'Use a VarSizeString as suffix')
+  t.end()
+})
+
+test('very long string', function (t) {
+  const a = 'あああああああああaa'
+  const aa = a + a + a + a + a + a + a + a + a + a
+  const aaa = aa + aa + aa + aa + aa + aa + aa + aa + aa + aa
+  const aaaa = aaa + aaa + aaa + aaa + aaa + aaa
+  t.equals(aaaa.length, 6600, 'raw length')
+  t.equals(size(aaaa), 12000, 'size of string')
+  t.equals(_substr(aaaa, 0, 1000).size, 1000, 'measured size')
+  t.end()
+})
+
+test('floating point operation', function (t) {
+  var s = str('abcde', function () {
+    return 0.5
+  })
+  t.equals(s.size(), 2.5, 'size')
+  t.equals(s.substring(0.5, 1.5).string, 'bc', 'substr')
   t.end()
 })
