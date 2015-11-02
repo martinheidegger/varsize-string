@@ -14,8 +14,8 @@ VarSizeString.prototype.init = function () {
       const lookup = this.characterLookup
       const sizes = new Float32Array(string.length)
       const chars = new Uint16Array(string.length)
-      for (var i = 0; i < string.length; i++) {
-        chars[i] = string.charCodeAt(i)
+      for (var j = 0; j < string.length; j++) {
+        chars[j] = string.charCodeAt(j)
       }
       const context = {}
       var size = 0
