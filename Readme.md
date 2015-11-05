@@ -51,7 +51,7 @@ Optionally takes `endOffset` which is the size offset from the end of the string
 
 ### `.substring(<int> startSize, [<int> endSize])`
 Analogous to [`String.substring`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/substring). This method will return the **fully visible** characters between `startSize` and `endSize`. If `endSize` is not given it will assume a substring from `startSize` until the end of the string.
-**Unlike** the `String.substring` however this method returns an object with the properties `size` and `string` in order to know the size of the substring.
+_However:_ **Unlike** `String.substring`, this method returns an object with the properties `size` and `string` in order to know the size of the substring.
 
 Example:
 ```JavaScript
@@ -174,3 +174,7 @@ Also it supports a fallback to regular if first is missing:
     first: {left: 'x', right: undefined},
     regular: {left: 'x', right: undefined}
 }
+```
+
+### `vsstring.padding(characterLookup, [process], [width], padding)`
+Turns a flexible padding definition into a clear padding definition. You can pass in an optional `process` variable to process the strings before they are being turned into varsizes-strings. You can also pass-in a `width` to make sure that the padding will not exceed the width of, say, a wrapped string.

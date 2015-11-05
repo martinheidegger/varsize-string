@@ -115,6 +115,23 @@ test('substring', function (t) {
   t.equal(substring('abあ\ndef', 2, 7), 'あ\nde', 'multiline, double width characters')
   t.end()
 })
+test('padding', function (t) {
+  t.equal(str.padding(vars, ' ').first.left.string, ' ', 'Turn string into variants')
+  t.equal(str.padding(vars, 1, ' ').first.left.string, '', 'Turn string into variants')
+  t.equal(str.padding(vars, function (str) {
+    return 'x'
+  }, ' ').first.left.string, 'x', 'Apply the template method')
+  t.equal(str.padding(vars, function (str) {
+    return 'x'
+  }, ' ').regular.left.string, 'x', 'Apply the template method')
+  t.equal(str.padding(vars, function (str) {
+    return 'x' + str
+  }, {first: 'a', regular: 'b'}).first.left.string, 'xa', 'Apply the template method for each string separtely')
+  t.equal(str.padding(vars, function (str) {
+    return 'x' + str
+  }, {first: 'a', regular: 'b'}).regular.left.string, 'xb', 'Apply the template method for each string separtely')
+  t.end()
+})
 test('substr', function (t) {
   t.equal(substr('abcd', 1), 'bcd')
   t.end()

@@ -1,5 +1,4 @@
-
-function preparePaddingSet (characterLookup, width, padding, override, fallback) {
+function preparePaddingSet (characterLookup, width, process, padding, override, fallback) {
   var result
   if (typeof padding === 'string') {
     padding = {left: padding, right: undefined}
@@ -28,24 +27,43 @@ function preparePaddingSet (characterLookup, width, padding, override, fallback)
     }
   }
   if (result.left !== undefined && !(result.left instanceof VarSizeString)) {
-    result.left = new VarSizeString(result.left, characterLookup)
+    result.left = new VarSizeString(process(result.left), characterLookup)
   }
   if (result.right !== undefined && !(result.right instanceof VarSizeString)) {
-    result.right = new VarSizeString(result.right, characterLookup)
+    result.right = new VarSizeString(process(result.right), characterLookup)
   }
   var leftSize = result.left ? result.left.size() : 0
   var rightSize = result.right ? result.right.size() : 0
-  while (rightSize > 0 && (leftSize + rightSize) >= width) {
-    rightSize = result.right.pop()
-  }
-  while (leftSize >= width) {
-    leftSize = result.left.pop()
+  if (!isNaN(width)) {
+    while (rightSize > 0 && (leftSize + rightSize) >= width) {
+      rightSize = result.right.pop()
+    }
+    while (leftSize >= width) {
+      leftSize = result.left.pop()
+    }
   }
   return result
 }
 
-function preparePadding (padding, characterLookup, width) {
-  var prepare = preparePaddingSet.bind(null, characterLookup, width)
+function preparePadding (characterLookup, process, width, padding) {
+  if (arguments.length === 2) {
+    padding = process
+    process = undefined
+  } else if (arguments.length === 3) {
+    padding = width
+    if (typeof process === 'function') {
+      width = undefined
+    } else {
+      width = process
+      process = undefined
+    }
+  }
+  if (!process) {
+    process = function (str) {
+      return str
+    }
+  }
+  var prepare = preparePaddingSet.bind(null, characterLookup, width, process)
   var override = prepare(padding)
   var regular = prepare(padding && padding.regular, override)
   return {
@@ -61,6 +79,7 @@ function VarSizeString (string, characterLookup) {
   this.string = string
   this.characterLookup = characterLookup
 }
+VarSizeString.padding = preparePadding
 VarSizeString.prototype.init = function () {
   if (isNaN(this._size)) {
     if (this.string.length > 0) {
@@ -193,12 +212,12 @@ VarSizeString.prototype.getLines = function () {
   }
   return this._lines
 }
-VarSizeString.prototype.wrap = function (width, padding) {
+VarSizeString.prototype.wrap = function (width, padding, process) {
   const sep = ' '
   const sepLength = 1
   const lineBreak = '\n'
 
-  padding = preparePadding(padding, this.characterLookup, width)
+  padding = preparePadding(this.characterLookup, process, width, padding)
 
   var hadLeftOver = false
   var currentPadding = padding.first
