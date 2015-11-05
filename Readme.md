@@ -62,7 +62,11 @@ vsstring('abcdef', charWidth).substring(0, 3) // {string: 'abc', size: 2.4}
 ### `.substr(<int> startSize, [<int> size])`
 Equal to `.substring(startSize, startSize + size)`.
 
-### `.wrap(<int> width)`
+
+### `.truncate(<int> size, <varsize-string || String> suffix)`
+Truncates the string after a size. Will append the given `suffix` to the string if it does exceed the size.
+
+### `.wrap(<int> width, [padding])`
 Normalizes the string in order for all lines to fit within `width`.
 
 Example:
@@ -73,6 +77,97 @@ vsstring('ab cd ef', charWidth).wrap(5) // 'ab cd\nef'
 vsstring('ab cd ef', charWidth).wrap(3) // 'ab\ncd\nef'
 ```
 
-### `.truncate(<int> size, <varsize-string || String> suffix)`
-Truncates the string after a size. Will append the given `suffix` to the string if it does exceed the size.
+#### Padding
+The padding option takes a padding specification and applies it to the
+wrapping process.
 
+Example:
+
+```JavaScript
+var padding = {
+    first: {left: ' - ', right: ' '},
+    regular: {left: '   ', right: ' '}
+}
+vsstring('abcdefghijklmnop', charWidth).wrap(10, padding)
+//  - abcdef
+//    ghijkl
+//    mnop
+```
+
+There are a few shorthands to specifying the padding:
+
+```JavaScript
+padding = '  '
+```
+
+... is equals to ...
+
+```JavaScript
+{
+    first: '  ',
+    regular: '  '
+}
+```
+
+... is equals to ...
+
+```JavaScript
+{
+    first: {left: '  ': right: undefined},
+    regular: {left: '  ': right: undefined}
+}
+```
+
+Also you can preset left/right for both first and regular:
+
+```JavScript
+{
+    right: 'x',
+    first: {left: ' - '},
+    regular: {left: '   '}
+}
+```
+
+... is equal to ... 
+
+```JavaScript
+{
+    first: {left: ' - ', right: 'x'},
+    regular: {left: '   ', right: 'x'}
+}
+```
+
+Note that the left/right presets override the first/regular specification:
+
+```JavaScript
+{
+    left: 'x',
+    first: '-',
+    regular: ' '
+}
+```
+
+... is equal to ...
+
+```JavaScript
+{
+    first: {left: 'x', right: undefined},
+    regular: {left: 'x', right: undefined}
+}
+```
+
+Also it supports a fallback to regular if first is missing:
+
+```JavaScript
+{
+    regular: {left: 'x', right: undefined}
+}
+```
+
+... is equal to ...
+
+```JavaScript
+{
+    first: {left: 'x', right: undefined},
+    regular: {left: 'x', right: undefined}
+}
