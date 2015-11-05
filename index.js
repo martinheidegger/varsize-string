@@ -1,9 +1,72 @@
+
+function preparePaddingSet (characterLookup, width, padding, override, fallback) {
+  var result;
+  if (typeof padding === 'string') {
+    padding = {left: padding, right: undefined}
+  } else if (typeof padding !== 'object') {
+    padding = {}
+  }
+  if (override) {
+    if (padding) {
+      result = {
+        left: override.left || padding.left,
+        right: override.right || padding.right
+      }
+    } else {
+      result = {
+        left: override.left,
+        right: override.right
+      }
+    }
+  } else if (padding) {
+    result = {
+      left: padding.left,
+      right: padding.right
+    }
+  } else {
+    result = {}
+  }
+
+  if (fallback) {
+    if (result.left === undefined) {
+      result.left = fallback.left
+    }
+
+    if (result.right === undefined) {
+      result.right = fallback.right
+    }
+  }
+  if (result.left !== undefined && !(result.left instanceof VarSizeString)) {
+    result.left = new VarSizeString(result.left, characterLookup)
+  }
+  if (result.right !== undefined && !(result.right instanceof VarSizeString)) {
+    result.right = new VarSizeString(result.right, characterLookup)
+  }
+  var leftSize = result.left ? result.left.size() : 0
+  var rightSize = result.right ? result.right.size() : 0
+  while (rightSize > 0 && (leftSize + rightSize) >= width) {
+    rightSize = result.right.pop()
+  }
+  while (leftSize >= width) {
+    leftSize = result.left.pop()
+  }
+  return result
+}
+
+function preparePadding (padding, characterLookup, width) {
+  var prepare = preparePaddingSet.bind(null, characterLookup, width)
+  var override = prepare(padding)
+  var regular = prepare(padding && padding.regular, override)
+  return {
+    first: prepare(padding && padding.first, override, regular),
+    regular: regular
+  }
+}
+
 function VarSizeString (string, characterLookup) {
   if (!(this instanceof VarSizeString)) {
     return new VarSizeString(string, characterLookup)
   }
-
-  string = string.replace(/^\s+|\s+$/g, '')
   this.string = string
   this.characterLookup = characterLookup
 }
@@ -43,6 +106,22 @@ VarSizeString.prototype.substr = function (start, size) {
     return this.substring(start)
   }
   return this.substring(start, start + size)
+}
+VarSizeString.prototype.pop = function () {
+  this.init()
+  if (!this._sizes) {
+    return 0
+  }
+  var last = this._sizes.length - 1
+  var newSize = this._sizes[last]
+  this._sizes = this._sizes.subarray(0, last)
+  this.string = this.string.substring(0, last)
+  if (this._sizes.length === 0) {
+    this._sizes = undefined
+  }
+  this._size = newSize
+  this._lines = undefined
+  return newSize
 }
 VarSizeString.prototype.substring = function (start, end) {
   this.init()
@@ -117,20 +196,63 @@ VarSizeString.prototype.width = function () {
 VarSizeString.prototype.getLines = function () {
   if (!this._lines) {
     this._lines = this.string.split(/[\r\n]+/).map(function (line) {
-      return new VarSizeString(line, this.characterLookup)
+      return new VarSizeString(line.replace(/^\s+|\s+$/g, ''), this.characterLookup)
     }.bind(this))
   }
   return this._lines
 }
-VarSizeString.prototype.wrap = function (width) {
+VarSizeString.prototype.wrap = function (width, padding) {
   const sep = ' '
   const sepLength = 1
   const lineBreak = '\n'
 
-  var remainingWidth = width
   var hadLeftOver = false
 
-  return this.getLines().reduce(function (result, line) {
+
+  padding = preparePadding(padding, this.characterLookup, width)
+  
+  function paddingRight() {
+    if (currentPadding.right && !/^\s*$/.test(currentPadding.right.string)) {
+      remainingWidth -= currentPadding.right.size()
+      if (remainingWidth > -1) {
+        result.push(new Array(remainingWidth + 2).join(' '))
+      }
+      result.push(currentPadding.right.string)
+    }
+  }
+
+  function paddingLeftInit() {
+    left = currentPadding.left
+    if (left) {
+      remainingWidth -= left.size()
+    }
+    if (currentPadding.right) {
+      remainingWidth -= currentPadding.right.size()
+    }
+  }
+
+  function nextLine() {
+    paddingRight()
+    result.push(lineBreak)
+    hadLeftOver = false
+    remainingWidth = width
+    currentPadding = padding.regular
+    paddingLeftInit()
+  }
+
+  function leftPad() {
+    if (left) {
+      result.push(left.string)
+      left = false
+    }
+  }
+
+  var currentPadding = padding.first
+  var left
+  var remainingWidth = width
+  var result = []
+  paddingLeftInit()
+  this.getLines().forEach(function (line) {
     var lineWidth = line.size()
     var lineOffset = 0
     while (lineWidth - lineOffset + (hadLeftOver ? sepLength : 0) > remainingWidth) {
@@ -143,27 +265,32 @@ VarSizeString.prototype.wrap = function (width) {
           result.push(sep)
           remainingWidth -= sepLength
         }
+        leftPad()
         result.push(line.substring(lineOffset, sepPos).string.replace(/^\s+|\s+$/g, ''))
         lineOffset = sepPos + 1
       } else if (!hadLeftOver) {
         var part = line.substr(lineOffset, remainingWidth)
+        leftPad()
         result.push(part.string.replace(/^\s+|\s+$/g, ''))
         lineOffset += part.size
+        remainingWidth -= part.size
       }
-      result.push(lineBreak)
-      hadLeftOver = false
-      remainingWidth = width
+      nextLine()
     }
     var content = line.substring(lineOffset).string.replace(/^\s+|\s+$/g, '')
     if (hadLeftOver) {
       result.push(sep)
       remainingWidth -= sepLength
     }
+    leftPad()
     result.push(content)
     hadLeftOver = true
     remainingWidth -= (lineWidth - lineOffset)
     return result
-  }, []).join('')
+  })
+
+  paddingRight()
+  return result.join('')
 }
 VarSizeString.prototype.sizeBeforeFirst = function (search, startAfter) {
   this.init()
