@@ -66,6 +66,9 @@ Equal to `.substring(startSize, startSize + size)`.
 ### `.truncate(<int> size, <varsize-string || String> suffix)`
 Truncates the string after a size. Will append the given `suffix` to the string if it does exceed the size.
 
+### `.pop()`
+Removes the last character from the string and returns the new `.size()`.
+
 ### `.wrap(<int> width, [padding])`
 Normalizes the string in order for all lines to fit within `width`.
 
