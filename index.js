@@ -1,30 +1,21 @@
 
 function preparePaddingSet (characterLookup, width, padding, override, fallback) {
-  var result;
+  var result
   if (typeof padding === 'string') {
     padding = {left: padding, right: undefined}
   } else if (typeof padding !== 'object') {
     padding = {}
   }
   if (override) {
-    if (padding) {
-      result = {
-        left: override.left || padding.left,
-        right: override.right || padding.right
-      }
-    } else {
-      result = {
-        left: override.left,
-        right: override.right
-      }
+    result = {
+      left: override.left || padding.left,
+      right: override.right || padding.right
     }
-  } else if (padding) {
+  } else {
     result = {
       left: padding.left,
       right: padding.right
     }
-  } else {
-    result = {}
   }
 
   if (fallback) {
@@ -93,6 +84,7 @@ VarSizeString.prototype.init = function () {
       this._sizes = sizes
       this._size = size
     } else {
+      delete this._sizes
       this._size = 0
     }
   }
@@ -206,12 +198,15 @@ VarSizeString.prototype.wrap = function (width, padding) {
   const sepLength = 1
   const lineBreak = '\n'
 
-  var hadLeftOver = false
-
-
   padding = preparePadding(padding, this.characterLookup, width)
-  
-  function paddingRight() {
+
+  var hadLeftOver = false
+  var currentPadding = padding.first
+  var left
+  var remainingWidth = width
+  var result = []
+
+  function paddingRight () {
     if (currentPadding.right && !/^\s*$/.test(currentPadding.right.string)) {
       remainingWidth -= currentPadding.right.size()
       if (remainingWidth > -1) {
@@ -221,7 +216,7 @@ VarSizeString.prototype.wrap = function (width, padding) {
     }
   }
 
-  function paddingLeftInit() {
+  function paddingLeftInit () {
     left = currentPadding.left
     if (left) {
       remainingWidth -= left.size()
@@ -231,7 +226,7 @@ VarSizeString.prototype.wrap = function (width, padding) {
     }
   }
 
-  function nextLine() {
+  function nextLine () {
     paddingRight()
     result.push(lineBreak)
     hadLeftOver = false
@@ -240,17 +235,13 @@ VarSizeString.prototype.wrap = function (width, padding) {
     paddingLeftInit()
   }
 
-  function leftPad() {
+  function leftPad () {
     if (left) {
       result.push(left.string)
       left = false
     }
   }
 
-  var currentPadding = padding.first
-  var left
-  var remainingWidth = width
-  var result = []
   paddingLeftInit()
   this.getLines().forEach(function (line) {
     var lineWidth = line.size()

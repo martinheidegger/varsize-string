@@ -166,6 +166,7 @@ test('wrapping', function (t) {
 })
 
 test('wrapping with padding', function (t) {
+  t.equal(wrap('abcd', 6, {left: undefined}), 'abcd', 'no padding')
   t.equal(wrap('abcd', 6, ' '), ' abcd', 'regular padding')
   t.equal(wrap('abcd', 8, {left: '_', right: '_'}), '_abcd  _', 'wrapping with right padding should fill up the missing characters with spaces')
   t.equal(wrap('abcd', 8, {left: '_', right: ' '}), '_abcd', '... except when the padding is made of spaces')
@@ -175,28 +176,33 @@ test('wrapping with padding', function (t) {
   t.equal(wrap('abcdef', 4, {first: 'x', regular: '-'}), 'xabc\n-def', 'different paddings in first and following rows')
   t.equal(wrap('abcdefgh', 4, {first: '--', regular: '-'}), '--ab\n-cde\n-fgh', 'different padding size in first and following rows')
   t.equal(wrap('abcdefgh', 4, {
-    first:   {left: '_', right: '-'},
+    first: {left: '_', right: '-'},
     regular: {left: '8', right: '0'}
   }), '_ab-\n8cd0\n8ef0\n8gh0', 'full fletched padding settings')
   t.equal(wrap('abcdefgh', 4, {
-    right:   '-',
-    first:   '_',
+    right: '-',
+    first: '_',
     regular: '8'
   }), '_ab-\n8cd-\n8ef-\n8gh-', 'when right is given it will be used instead of the right padding defined in first/regular')
   t.equal(wrap('abcdefgh', 3, {
-    left:    '_',
-    first:   '-',
+    left: '_',
+    first: '-',
     regular: '0'
   }), '_ab\n_cd\n_ef\n_gh', 'when left is given it will be used instead of the left padding defined in first/regular')
   t.equal(wrap('abcdefgh', 3, {
-    left:    '_',
-    right:   '8',
-    first:   '-',
+    left: '_',
+    right: '8',
+    first: '-',
     regular: '0'
   }), '_a8\n_b8\n_c8\n_d8\n_e8\n_f8\n_g8\n_h8', 'left and right override first/regular')
   t.equal(wrap('abcd', 2, ' '), ' a\n b\n c\n d', 'if width is smaller than left and right padding, it should only pad left')
   t.equal(wrap('abcd', 5, {left: 'xxx', right: 'yyy'}), 'xxxay\nxxxby\nxxxcy\nxxxdy', 'if width is smaller than left and right padding, it should reduce the right padding')
   t.equal(wrap('abcd', 1, 'x'), 'a\nb\nc\nd', 'if width is smaller than the padding, padding should be entirely ignored')
+  t.end()
+})
+
+test('pop', function (t) {
+  t.equal(str('', vars).pop(), 0, 'should not fail with an empty string')
   t.end()
 })
 
