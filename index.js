@@ -222,26 +222,27 @@ VarSizeString.prototype.wrap = function (width, padding, process) {
   var hadLeftOver = false
   var currentPadding = padding.first
   var left
+  var right
   var remainingWidth = width
   var result = []
 
   function paddingRight () {
-    if (currentPadding.right && !/^\s*$/.test(currentPadding.right.string)) {
-      remainingWidth -= currentPadding.right.size()
-      if (remainingWidth > -1) {
-        result.push(new Array(remainingWidth + 2).join(' '))
+    if (right && !/^\s*$/.test(right.string)) {
+      if (remainingWidth > 0) {
+        result.push(new Array(remainingWidth + 1).join(' '))
       }
-      result.push(currentPadding.right.string)
+      result.push(right.string)
     }
   }
 
-  function paddingLeftInit () {
+  function paddingInit () {
     left = currentPadding.left
     if (left) {
       remainingWidth -= left.size()
     }
-    if (currentPadding.right) {
-      remainingWidth -= currentPadding.right.size()
+    right = currentPadding.right
+    if (right) {
+      remainingWidth -= right.size()
     }
   }
 
@@ -251,7 +252,7 @@ VarSizeString.prototype.wrap = function (width, padding, process) {
     hadLeftOver = false
     remainingWidth = width
     currentPadding = padding.regular
-    paddingLeftInit()
+    paddingInit()
   }
 
   function leftPad () {
@@ -261,7 +262,7 @@ VarSizeString.prototype.wrap = function (width, padding, process) {
     }
   }
 
-  paddingLeftInit()
+  paddingInit()
   this.getLines().forEach(function (line) {
     var lineWidth = line.size()
     var lineOffset = 0
@@ -287,15 +288,15 @@ VarSizeString.prototype.wrap = function (width, padding, process) {
       }
       nextLine()
     }
-    var content = line.substring(lineOffset).string.replace(/^\s+|\s+$/g, '')
+    var content = line.substring(lineOffset)
     if (hadLeftOver) {
       result.push(sep)
       remainingWidth -= sepLength
     }
     leftPad()
-    result.push(content)
+    result.push(content.string.replace(/^\s+|\s+$/g, ''))
     hadLeftOver = true
-    remainingWidth -= (lineWidth - lineOffset)
+    remainingWidth -= content.size
     return result
   })
 

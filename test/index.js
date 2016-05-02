@@ -190,6 +190,7 @@ test('wrapping with padding', function (t) {
   t.equal(wrap('abcd', 6, {left: '_', right: '-'}), '_abcd-', 'different paddings left and right')
   t.equal(wrap('abcd', 6, {left: '_'}), '_abcd', 'missing right assumes right to be empty string')
   t.equal(wrap('abcd', 6, {right: '_'}), 'abcd _', 'missing left assumes left to be empty string')
+  t.equal(wrap('abcddefgh', 7, {left: '_ ', right: '_'}), '_ abcd_\n_ defg_\n_ h   _', 'breaks with padding assume correct wrapping with right characters')
   t.equal(wrap('abcdef', 4, {first: 'x', regular: '-'}), 'xabc\n-def', 'different paddings in first and following rows')
   t.equal(wrap('abcdefgh', 4, {first: '--', regular: '-'}), '--ab\n-cde\n-fgh', 'different padding size in first and following rows')
   t.equal(wrap('abcdefgh', 4, {
