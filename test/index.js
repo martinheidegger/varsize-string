@@ -3,6 +3,7 @@ var str = require('../')
 
 function vars (chr) {
   var str = String.fromCharCode(chr)
+  if (chr === 0) return 0
   return ('あいうえおかきくけこさしすせそはひふへほ…'.indexOf(str) !== -1) ? 2 : 1
 }
 
@@ -104,6 +105,7 @@ test('substring', function (t) {
   t.equal(substring('abcd', 0, 4), 'abcd', 'whole string')
   t.equal(substring('abcd', 2, 3), 'c', 'character somewhere in the middle')
   t.equal(substring('abcd', 3, 4), 'd', 'character at the end')
+  t.equal(substring('abcd', 5, 6), '', 'empty string beyond end')
   t.equal(substring('あいうえお', 0, 1), '', 'double width getting half a character')
   t.equal(substring('あいうえお', 0, 2), 'あ', 'double width getting a double character')
   t.equal(substring('あいうえお', 1, 2), '', 'double width getting half a character should ignore')
@@ -113,6 +115,13 @@ test('substring', function (t) {
   t.equal(substring('abcあいうえおdeg', 3, 6), 'あ', 'mixed width characters without a problem.')
   t.equal(substring('abc\ndef', 2, 5), 'c\nd', 'multiline')
   t.equal(substring('abあ\ndef', 2, 7), 'あ\nde', 'multiline, double width characters')
+  t.equal(substring('\x00abcd', 0, 2), '\x00ab', 'getting zero-width character at start of line')
+  t.equal(substring('ab\x00cd', 0, 2), 'ab', 'ignore zero-width character at end')
+  t.equal(substring('ab\x00cd', 2, 4), '\x00cd', 'getting zero-width character in start')
+  t.equal(substring('abcd\x00', 2, 4), 'cd\x00', 'get zero-width character at end of line')
+  t.equal(substring('\x00abcd', 0, 0), '', 'get no zero-width characters from an empty slice')
+  t.equal(substring('abcd\x00', 4, 4), '\x00', 'get zero-width characters from an empty end slice')
+  t.equal(substring('\x00', 0, 0), '\x00', 'get zero-width character from empty line')
   t.end()
 })
 test('padding', function (t) {
@@ -179,6 +188,7 @@ test('wrapping', function (t) {
   t.equal(wrap('mnopq\nabcde', 4), 'mnop\nq\nabcd\ne', 'break within multiple breaks')
   t.equal(wrap('abcdefg\nhijklmno', 4), 'abcd\nefg\nhijk\nlmno', 'Sudden breaks in long text should work too')
   t.equal(wrap(' abcdefg de\nfgh ijklmnop\nqr st uv', 5), 'abcde\nfg de\nfgh\nijklm\nnop\nqr st\nuv', 'various linebreak and space combinations')
+  t.equal(wrap('\x00', 4), '\x00', 'leave zero-width characters alone')
   t.end()
 })
 
