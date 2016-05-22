@@ -105,6 +105,7 @@ test('substring', function (t) {
   t.equal(substring('abcd', 0, 4), 'abcd', 'whole string')
   t.equal(substring('abcd', 2, 3), 'c', 'character somewhere in the middle')
   t.equal(substring('abcd', 3, 4), 'd', 'character at the end')
+  t.equal(substring('abcd', 5, 6), '', 'empty string beyond end')
   t.equal(substring('あいうえお', 0, 1), '', 'double width getting half a character')
   t.equal(substring('あいうえお', 0, 2), 'あ', 'double width getting a double character')
   t.equal(substring('あいうえお', 1, 2), '', 'double width getting half a character should ignore')
