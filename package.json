@@ -1,6 +1,6 @@
 {
   "name": "varsize-string",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A package for working with strings where the different characters have different sizes.",
   "main": "index.js",
   "directories": {
