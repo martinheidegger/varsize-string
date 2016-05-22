@@ -158,7 +158,7 @@ VarSizeString.prototype.substring = function (start, end) {
     end = this._size
   }
 
-  if (start > this._size || start === end) {
+  if (start > this._size) {
     return {
       string: '',
       size: 0
@@ -181,10 +181,12 @@ VarSizeString.prototype.substring = function (start, end) {
   if (this._size <= end) {
     to = this.string.length
   } else {
-    while (sizes[to] <= end) {
+    while (sizes[to] < end) {
       ++to
     }
-    to -= 1
+    if (sizes[to] !== end) {
+      to -= 1
+    }
   }
 
   var endSize
